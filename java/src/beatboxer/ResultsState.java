@@ -6,6 +6,7 @@ public class ResultsState implements GameState {
     private BeatBoxerGame game;
     private boolean newHigh;
     private long enteredAt;
+    private boolean shotTaken = false;
 
     @Override public void enter(BeatBoxerGame game) {
         this.game = game;
@@ -13,8 +14,14 @@ public class ResultsState implements GameState {
         newHigh = game.submitHighScore(game.getScore().getScore());
         game.getFeedback().off();
         if (newHigh) game.getFeedback().correct();
+        game.logRound();
     }
-    @Override public void tick(long nowMs) { }
+    @Override public void tick(long nowMs) {
+        if (!shotTaken && nowMs - enteredAt > 300) {
+            shotTaken = true;
+            game.saveScreenshot("results_" + new java.text.SimpleDateFormat("HHmmss").format(new java.util.Date()));
+        }
+    }
     @Override public void onPadHit(char side, long timeMs) {
         if (System.currentTimeMillis() - enteredAt > 2000) game.setState(new ReadyState());
     }

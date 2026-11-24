@@ -6,7 +6,11 @@ public class ReadyState implements GameState {
     private BeatBoxerGame game;
 
     @Override public void enter(BeatBoxerGame game) { this.game = game; game.getFeedback().off(); }
-    @Override public void tick(long nowMs) { }
+    private boolean shot = false;
+    private long since = System.currentTimeMillis();
+    @Override public void tick(long nowMs) {
+        if (!shot && nowMs - since > 1500) { shot = true; game.saveScreenshot("start_screen"); }
+    }
     @Override public void onPadHit(char side, long timeMs) {
         // punch any pad to start
         game.setState(new PlayingState());

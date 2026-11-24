@@ -21,6 +21,7 @@ public class PlayingState implements GameState {
     private String message = "";
     private int lastPoints = 0;
     private boolean lastWasGood = false;
+    private boolean cueShot = false, hitShot = false;
 
     @Override public void enter(BeatBoxerGame game) {
         this.game = game;
@@ -44,6 +45,7 @@ public class PlayingState implements GameState {
                 }
                 break;
             case CUE:
+                if (!cueShot && beat >= 2 && now - phaseStart > 120) { cueShot = true; game.saveScreenshot("playing_target"); }
                 if (now - phaseStart > d.windowMs) {          // too late
                     game.getScore().registerMiss();
                     game.getFeedback().wrong();
@@ -51,6 +53,7 @@ public class PlayingState implements GameState {
                 }
                 break;
             case RESULT:
+                if (!hitShot && lastWasGood && now - phaseStart > 120) { hitShot = true; game.saveScreenshot("playing_hit"); }
                 if (now - phaseStart > d.gapMs) {
                     game.getFeedback().off();
                     if (beat >= BEATS_PER_ROUND) game.setState(new ResultsState());

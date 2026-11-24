@@ -152,6 +152,38 @@ public class BeatBoxerGame implements SensorListener {
         return true;
     }
 
+    // ---- test records: screenshots and a round log, saved in the "results" folder ----
+    private final File resultsDir = new File("results");
+
+    public void saveScreenshot(String name) {
+        if (screen == null || screen.getWidth() <= 0) return;
+        try {
+            resultsDir.mkdirs();
+            java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(
+                    screen.getWidth(), screen.getHeight(), java.awt.image.BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = img.createGraphics();
+            screen.paint(g);
+            g.dispose();
+            javax.imageio.ImageIO.write(img, "png", new File(resultsDir, name + ".png"));
+        } catch (Exception ignored) { }
+    }
+
+    public void logRound() {
+        try {
+            resultsDir.mkdirs();
+            File f = new File(resultsDir, "rounds.csv");
+            boolean isNew = !f.exists();
+            try (PrintWriter w = new PrintWriter(new FileWriter(f, true))) {
+                if (isNew) w.println("time,difficulty,glove_required,score,hits,wrong,missed,accuracy_percent,best_combo,avg_reaction_ms,xbee_port,pad_port,glove_seen");
+                w.println(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()) + ","
+                        + difficulty.label + "," + requireGlove + "," + score.getScore() + "," + score.getHits() + ","
+                        + score.getWrongs() + "," + score.getMisses() + "," + score.getAccuracy() + ","
+                        + score.getBestCombo() + "," + score.getAvgReaction() + "," + getXbeeStatus() + ","
+                        + getPadStatus() + "," + gloveSeen);
+            }
+        } catch (Exception ignored) { }
+    }
+
     // ---- getters / setters ----
     public GameState getState() { return state; }
     public ScoreManager getScore() { return score; }
